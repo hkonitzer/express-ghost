@@ -1,0 +1,32 @@
+{
+  "name": "express-ghost",
+  "version": "1.0.0",
+  "description": "Simple Express Middleware to fetch posts from the Ghost API",
+  "license": "MIT",
+  "author": "Hendrik Schellenberger",
+  "homepage": "https://github.com/hkonitzer/express-ghost#readme",
+  "keywords": [
+    "express",
+    "ghost",
+    "headless"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/hkonitzer/express-ghost.git"
+  },
+  "dependencies": {
+    "@tryghost/content-api": "^1.2.0",
+    "debug": "^4.1.1",
+    "nconf": "^0.10.0"
+  },
+  "devDependencies": {},
+  "bugs": {
+    "url": "https://github.com/hkonitzer/express-ghost/issues"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "engines": {
+    "node": "^6.9.0 || ^8.9.0 || ^10.13.0"
+  }
+}
