@@ -1,6 +1,6 @@
 {
   "name": "express-ghost",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Simple Express Middleware to fetch posts from the Ghost API",
   "license": "MIT",
   "author": "Hendrik Schellenberger",
@@ -28,5 +28,6 @@
   },
   "engines": {
     "node": "^6.9.0 || ^8.9.0 || ^10.13.0"
-  }
+  },
+  "main": "express-ghost"
 }
