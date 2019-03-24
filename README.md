@@ -1,7 +1,7 @@
 # express-ghost
 Simple Express middleware to fetch posts from the Ghost API and cache them into memory.
 
-Currently only supports posts from the [ghost bloggin plattform](https://ghost.org/)
+Currently only supports posts from the [ghost blogging plattform](https://ghost.org/)
 
 Tag your posts in ghost with your urls and the middleware fetches all posts with this tag
 and provides them in the `res.locals` from Express.
@@ -104,11 +104,8 @@ const router = express.Router();
 const ghost = require('express-ghost');
 
 router.get('/purgeghostcache', function (req, res) {
-    ghost.posts({}, true).then(function(postsArray) {
-        res.status(200).json({ posts: postsArray.length });
-    }).catch(function(err) {
-        res.status(500).json(err);
-    });
+    ghost.purge();
+    res.status(200).json({ pruge: true });
 });
 
 module.exports = router;
