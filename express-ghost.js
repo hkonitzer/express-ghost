@@ -112,7 +112,7 @@ const GhostCache = function() {
                 url = url.substring(1);
             }
             let ghostParams = { limit: 5, filter: 'tags:'+ url };
-            ghost.posts(ghostParams).then(function(obj) {
+            posts(ghostParams).then(function(obj) {
                 res.locals.ghostdata.posts = obj;
                 next();
             }).catch(function(err) {
