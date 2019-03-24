@@ -129,5 +129,5 @@ like the [Ghost Content-API](https://docs.ghost.org/api/javascript/content/).
 
 ### Logging
 
-With [debug](https://www.npmjs.com/package/debug)
+With [debug](https://www.npmjs.com/package/debug), prefix is: "ghostapi:"
  
