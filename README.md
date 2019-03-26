@@ -3,13 +3,13 @@ Simple Express middleware to fetch posts from the Ghost API and cache them into 
 
 Use the [ghost blogging plattform](https://ghost.org/) as headless CMS for your express 
 powered website.
-Currently only supports posts from the ghost api. 
+Currently only supports posts and pages from the ghost api. 
 
-Tag your posts in ghost with your urls and the middleware fetches all posts with this tag
-and provides them in the `res.locals` from Express.
+Tag your posts or pages in ghost with your urls and the middleware fetches all posts 
+with this tag and provides them in the `res.locals` from Express.
 
 For example, you have a page like www.myhomepage.org/aboutus.
-So you have to tag your post with "aboutus". 
+So you have to tag your post (or page) with "aboutus". 
 
 The only expection is the root: www.myhomepage.org/, to get your posts here you have to
 tag them with "homepage".
@@ -54,9 +54,9 @@ Install the middleware in your routes like this:
 ```
 const express = require('express');
 const router = express.Router();
-const ghostAPI = require('express-ghost');
+const ghostAPI = require('express-ghost')();
 
-router.use(ghostAPI.postMiddleware);
+router.use(ghostAPI.postsMiddleware);
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
@@ -65,7 +65,8 @@ router.get('/', function(req, res, next) {
 
 module.exports = router;
 ```
-
+If you wish to fetch the pages instead, replace the use with `router.use(ghostAPI.pagesMiddleware);`.
+Of course you can use both middlewares.
 Now you have access to an object in the [res.locals.ghostdata](https://expressjs.com/en/4x/api.html#res.locals)
 
 You can use this in your templates, for example with EJS:
@@ -73,9 +74,9 @@ index-route.js:
 ```
 const express = require('express');
 const router = express.Router();
-const ghostAPI = require('express-ghost');
+const ghostAPI = require('express-ghost')();
 
-router.use(ghostAPI.postMiddleware);
+router.use(ghostAPI.postsMiddleware);
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
@@ -94,6 +95,7 @@ template.ejs:
     <% }); %>
 <% } %>
 ```
+The pages array can be accessd under `ghostdata.pages`.
 
 ### Purging the cache
 
@@ -125,9 +127,9 @@ not properly secured.
 
 Only posts that are tagged with the matching urls (`res.originalURL`) are fetched.
 The middleware gets only the latest 5 posts.
-You can use the api direct with the `ghostAPI.posts({})` function to fetch more 
-than 5 posts. The function takes the same paramerts and will provide an promise 
-like the [Ghost Content-API](https://docs.ghost.org/api/javascript/content/).
+You can use the api direct with the `ghostAPI.posts({})` or `ghostAPI.pages({})` 
+function to fetch more than 5 posts/pages. The function takes the same parameters 
+and will provide an promise like the [Ghost Content-API](https://docs.ghost.org/api/javascript/content/).
 
 ### Logging
 
