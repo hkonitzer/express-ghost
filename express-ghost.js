@@ -45,6 +45,7 @@ const GhostCache = function() {
     let ghostAPI;
     // cache container for posts
     const postsCache = new GhostCacheContainer();
+    const pagesCache = new GhostCacheContainer();
 
     function init(apiOptions) {
         opt.url = apiOptions.url;
@@ -57,6 +58,40 @@ const GhostCache = function() {
         });
         initialized = true;
         //debug('ghost.js init - api configured: url=%s, key=%s', opt.url, opt.key);
+    }
+
+    function getPages(filterOption) {
+        filterOption = filterOption || '';
+        return ghostAPI.pages
+            .browse({ limit: 50, include: 'tags', filter: filterOption})
+    }
+
+    function pages(options, force) {
+        if (!initialized) return new Promise(function(resolve) { resolve([]); });
+        force = force || false;
+        options = options || {};
+        let tagName;
+        if (options.filter)
+            tagName = options.filter.substring(5);
+        else
+            tagName = '*';
+        debug(`Calling ghost to fetch pages with force-Parameter=${force} and tag=${tagName}`);
+        if (force || pagesCache.get(tagName) === null) {
+            return new Promise(function(resolve ,reject) {
+                getPages(options.filter).then(function(pages) {
+                    debug(`Serving ghost page data from api, fetched ${pages.length} pages`);
+                    pagesCache.set(tagName, pages);
+                    resolve(pagesCache.get(tagName, options.limit));
+                }).catch(function(err) {
+                    reject(err);
+                });
+            });
+        } else {
+            return new Promise(function(resolve) {
+                debug(`Serving ghost pages data from cache`);
+                resolve(pagesCache.get(tagName, options.limit));
+            });
+        }
     }
 
     function getPosts(filterOption) {
@@ -95,12 +130,13 @@ const GhostCache = function() {
 
     function getEmptryGhostObject() {
         return {
-            posts: []
+            posts: [],
+            pages: []
         }
     }
 
-    function postMiddleware(req, res, next) {
-        res.locals.ghostdata = getEmptryGhostObject();
+    function postsMiddleware(req, res, next) {
+        if (!res.locals.ghostdata) res.locals.ghostdata = getEmptryGhostObject();
         if (initialized) {
             // set filter for requested path
             let url = req.originalUrl;
@@ -117,18 +153,45 @@ const GhostCache = function() {
                 next(err);
             });
         } else {
+            debug('Cannot call ghost API via postsMiddleware: API not initialized');
+            next();
+        }
+    }
+
+    function pagesMiddleware(req, res, next) {
+        if (!res.locals.ghostdata) res.locals.ghostdata = getEmptryGhostObject();
+        if (initialized) {
+            // set filter for requested path
+            let url = req.originalUrl;
+            if (url === '/') {
+                url = 'homepage'
+            } else {
+                url = url.substring(1);
+            }
+            let ghostParams = { limit: 5, filter: 'tags:'+ url };
+            pages(ghostParams).then(function(obj) {
+                res.locals.ghostdata.pages = obj;
+                next();
+            }).catch(function(err) {
+                next(err);
+            });
+        } else {
+            debug('Cannot call ghost API via pagesMiddleware: API not initialized');
             next();
         }
     }
 
     function purgeCache() {
         postsCache.clear();
+        pagesCache.clear();
     }
 
     return {
         init: init,
         posts: posts,
-        postMiddleware: postMiddleware,
+        pages: pages,
+        pagesMiddleware: pagesMiddleware,
+        postsMiddleware: postsMiddleware,
         purge: purgeCache
     }
 
