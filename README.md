@@ -1,7 +1,9 @@
 # express-ghost
 Simple Express middleware to fetch posts from the Ghost API and cache them into memory.
 
-Currently only supports posts from the [ghost blogging plattform](https://ghost.org/)
+Use the [ghost blogging plattform](https://ghost.org/) as headless CMS for your express 
+powered website.
+Currently only supports posts from the ghost api. 
 
 Tag your posts in ghost with your urls and the middleware fetches all posts with this tag
 and provides them in the `res.locals` from Express.
@@ -33,7 +35,10 @@ with the following credentials:
 }
 ```
 
-In this case, the module initialized the ghost api as soon as the first import is made.
+In this case, the module initialized the ghost api as soon as the first import 
+with config object given is made:
+`const ghostAPI = require('express-ghost')(config);`
+
 Otherwise you have to provide the url and key settings in the init function:
 ```
 const ghostAPI = require('express-ghost');
@@ -63,7 +68,7 @@ module.exports = router;
 
 Now you have access to an object in the [res.locals.ghostdata](https://expressjs.com/en/4x/api.html#res.locals)
 
-You can use this in the templates, for example in EJS:
+You can use this in your templates, for example with EJS:
 index-route.js:
 ```
 const express = require('express');
