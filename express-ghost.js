@@ -1,7 +1,5 @@
 "use strict";
 
-const config =  require('nconf');
-
 const loggingFunction = require('debug');
 const info = loggingFunction('ghostapi:app');
 const debug = loggingFunction('ghostapi:debug');
@@ -139,9 +137,14 @@ const GhostCache = function() {
 
 const ghostCache = new GhostCache();
 
-if (config.get('ghost').enabled === true) {
-    info(`Ghost enabled with host ${config.get('ghost').url}`);
-    ghostCache.init(config.get('ghost'));
-}
-
-module.exports = ghostCache;
+module.exports = function(config) {
+    if (config) {
+        if (config.get && config.get('ghost') && config.get('ghost').enabled === true) {
+            info(`Ghost config found, initialize with host ${config.get('ghost').url}`);
+            ghostCache.init(config.get('ghost'));
+        } else {
+            debug('Could not find any ghost API crenditals in provided config');
+        }
+    }
+    return ghostCache;
+};
