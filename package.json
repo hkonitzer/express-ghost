@@ -15,7 +15,7 @@
     "url": "git://github.com/hkonitzer/express-ghost.git"
   },
   "dependencies": {
-    "@tryghost/content-api": "^1.2.0",
+    "@tryghost/content-api": "^1.2.4",
     "debug": "^4.1.1",
     "nconf": "^0.10.0"
   },
