@@ -16,9 +16,19 @@ const GhostCacheContainer = function() {
         cache = {};
     }
 
-    function set(tagName, object) {
+    function set(tagName, contentArray) {
         tags.push(tagName);
-        cache[tagName] = object;
+        // are there featured posts? (response payload is sorted by date)
+        // create 2 arrays, the first one for all featured post/pages and the second one for all others
+        let normalContent = new Array(), featuredContent = new Array();
+        for (let c = 0, cx = contentArray.length; c < cx; ++c) {
+            if (contentArray[c].featured)
+                featuredContent.push(contentArray[c]);
+            else
+                normalContent.push(contentArray[c]);
+        }
+        // combine both arrays, features post/pages first
+        cache[tagName] = featuredContent.concat(normalContent);
     }
 
     function get(tagName, limit) {
