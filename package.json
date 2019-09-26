@@ -1,6 +1,6 @@
 {
   "name": "express-ghost",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "description": "Simple Express Middleware to fetch posts from the Ghost API",
   "license": "MIT",
   "author": "Hendrik Schellenberger",
@@ -15,7 +15,7 @@
     "url": "git://github.com/hkonitzer/express-ghost.git"
   },
   "dependencies": {
-    "@tryghost/content-api": "^1.2.4",
+    "@tryghost/content-api": "^1.2.10",
     "debug": "^4.1.1",
     "nconf": "^0.10.0"
   },

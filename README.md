@@ -131,6 +131,11 @@ You can use the api direct with the `ghostAPI.posts({})` or `ghostAPI.pages({})`
 function to fetch more than 5 posts/pages. The function takes the same parameters 
 and will provide an promise like the [Ghost Content-API](https://docs.ghost.org/api/javascript/content/).
 
+#### Long URLs with slashes
+
+Long URLs like /aboutus/team can be used, but you have to replaced the / sign with -.
+Example: Instead a tag of "abouts/team", the tag must be named "aboutus-team".
+
 ### Logging
 
 With [debug](https://www.npmjs.com/package/debug), prefix is: "ghostapi:"
