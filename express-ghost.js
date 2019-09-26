@@ -155,6 +155,9 @@ const GhostCache = function() {
             } else {
                 url = url.substring(1);
             }
+            if (url.indexOf('/') > 1) {
+                url = url.replace('/', '-')
+            }
             let ghostParams = { limit: 5, filter: 'tags:'+ url };
             posts(ghostParams).then(function(obj) {
                 res.locals.ghostdata.posts = obj;
@@ -177,6 +180,9 @@ const GhostCache = function() {
                 url = 'homepage'
             } else {
                 url = url.substring(1);
+            }
+            if (url.indexOf('/') > 1) {
+                url = url.replace('/', '-')
             }
             let ghostParams = { limit: 5, filter: 'tags:'+ url };
             pages(ghostParams).then(function(obj) {
