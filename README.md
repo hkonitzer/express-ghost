@@ -18,7 +18,7 @@ tag them with "homepage".
 
 This project uses [nconf](https://www.npmjs.com/package/nconf) under the hood to
 get the needed credentials to access the ghost api.
-To get the api credentials you have to provide an "Custom integration" 
+To get the api credentials you have to provide an "Custom integration" configuration
 in your ghost backend.
 
 You can provide settings, e.g. in an json file, like 
@@ -65,7 +65,7 @@ router.get('/', function(req, res, next) {
 
 module.exports = router;
 ```
-If you wish to fetch the pages instead, replace the use with `router.use(ghostAPI.pagesMiddleware);`.
+If you wish to fetch the pages instead, replace the paremter for the use-function with `router.use(ghostAPI.pagesMiddleware);`.
 Of course you can use both middlewares.
 Now you have access to an object in the [res.locals.ghostdata](https://expressjs.com/en/4x/api.html#res.locals)
 
@@ -95,7 +95,7 @@ template.ejs:
     <% }); %>
 <% } %>
 ```
-The pages array can be accessd under `ghostdata.pages`.
+The pages array can be accessed under `ghostdata.pages`.
 
 ### Purging the cache
 
@@ -121,14 +121,46 @@ module.exports = router;
 Switch your route to POST an you can set up a [Ghost webhook](https://docs.ghost.org/api/webhooks/) 
 to clear the cache if some of the content are changing (listen to event `site.changed`)
 Beware: This example has some security implications: someone can DDOS your ghost api if
-not properly secured. 
+not properly secured.
+
+### Manipulate the ghost html response
+
+The ghost html reponses contains already classes (and elements) for special content items like galleries
+(like `class="kg-gallery-card"`). If you want to get rid of them or replace them with your own (class-) attributes you
+can provide a parser- (actually filter-) function.
+
+The javascript function has to to accept a string (as first argument) and to return a string.
+Second argument is optional and can be a tag name, as the function is only executed on posts/pages for the given tag.
+
+Simple use case (in this example no parsing/filtering, just logging):
+
+index-route.js:
+```
+const express = require('express');
+const router = express.Router();
+const ghostAPI = require('express-ghost')();
+
+router.use(ghostAPI.postsMiddleware);
+const logGhostHTMLResponse = function(htmlString) {
+    console.log('PARSING: ', htmlString);
+    return htmlString;
+};
+ghost.setPostHTMLParser(logGhostHTMLResponse);
+
+/* GET home page. */
+router.get('/', function(req, res, next) {
+  res.render('index', { title: 'Express', ghostdata: res.locals.ghostdata });
+});
+
+module.exports = router;
+```
 
 ### Limitations
 
 Only posts that are tagged with the matching urls (`res.originalURL`) are fetched.
-The middleware gets only the latest 5 posts.
+The middleware gets only the latest 10 posts.
 You can use the api direct with the `ghostAPI.posts({})` or `ghostAPI.pages({})` 
-function to fetch more than 5 posts/pages. The function takes the same parameters 
+function to fetch more than 10 posts/pages. The function takes the same parameters
 and will provide an promise like the [Ghost Content-API](https://docs.ghost.org/api/javascript/content/).
 
 #### Long URLs with slashes
