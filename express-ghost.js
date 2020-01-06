@@ -1,5 +1,4 @@
 "use strict";
-
 const loggingFunction = require('debug');
 const info = loggingFunction('ghostapi:app');
 const debug = loggingFunction('ghostapi:debug');
@@ -50,7 +49,10 @@ const GhostCacheContainer = function() {
 };
 
 const GhostCache = function() {
-    let opt = {};
+    let opt = {
+        pagesParser : new Map(),
+        postsParser : new Map()
+    };
     let initialized = false;
     let ghostAPI;
     // cache container for posts
@@ -90,6 +92,16 @@ const GhostCache = function() {
             return new Promise(function(resolve ,reject) {
                 getPages(options.filter).then(function(pages) {
                     debug(`Serving ghost page data from api, fetched ${pages.length} pages`);
+                    if (opt.pagesParser.has(tagName)) { // first the parser bound to a specific tag name
+                        const parser = opt.pagesParser.get(tagName);
+                        debug(`Executing parser "${parser.name}" for tagName=${tagName}`);
+                    } else if (opt.pagesParser.has('all')) {
+                        const parser = opt.pagesParser.get('all');
+                        debug(`Executing parser "${parser.name}" for tagName=all`);
+                        pages.forEach(page => {
+                            page.html = parser(page.html);
+                        });
+                    }
                     pagesCache.set(tagName, pages);
                     resolve(pagesCache.get(tagName, options.limit));
                 }).catch(function(err) {
@@ -124,6 +136,17 @@ const GhostCache = function() {
             return new Promise(function(resolve ,reject) {
                 getPosts(options.filter).then(function(posts) {
                     debug(`Serving ghost post data from api, fetched ${posts.length} posts`);
+                    if (opt.postsParser.has(tagName)) { // first the parser bound to a specific tag name
+                        const parser = opt.postsParser.get(tagName);
+                        debug(`Executing parser "${parser.name}" for tagName=${tagName}`);
+                    } else if (opt.postsParser.has('all')) {
+                        const parser = opt.postsParser.get('all');
+                        debug(`Executing parser "${parser.name}" for tagName=all`);
+                        //posts.forEach(post => parser(post.html));
+                        posts.forEach(post => {
+                          post.html = parser(post.html);
+                        });
+                    }
                     postsCache.set(tagName, posts);
                     resolve(postsCache.get(tagName, options.limit));
                 }).catch(function(err) {
@@ -138,15 +161,31 @@ const GhostCache = function() {
         }
     }
 
-    function getEmptryGhostObject() {
+    function getEmptyGhostObject() {
         return {
             posts: [],
             pages: []
         }
     }
 
+    function setPostHTMLParser(htmlParserFunction, tagName) {
+        if (!tagName)
+            tagName = 'all';
+        if (typeof htmlParserFunction === 'function') {
+            const testParser = htmlParserFunction('<p>Lorem Ipsum</p>');
+            if (typeof testParser !== 'string') {
+                debug(`setPostHTMLParser needs a function that returns a string`);
+            } else {
+                opt.postsParser.set(tagName, htmlParserFunction);
+                debug(`HTMLParser for posts with function "${htmlParserFunction.name}" set for tag=${tagName}`);
+            }
+        } else {
+            debug(`setPostHTMLParser needs a function as parameter`);
+        }
+    }
+
     function postsMiddleware(req, res, next) {
-        if (!res.locals.ghostdata) res.locals.ghostdata = getEmptryGhostObject();
+        if (!res.locals.ghostdata) res.locals.ghostdata = getEmptyGhostObject();
         if (initialized) {
             // set filter for requested path
             let url = req.originalUrl;
@@ -155,7 +194,10 @@ const GhostCache = function() {
             } else {
                 url = url.substring(1);
             }
-            let ghostParams = { limit: 5, filter: 'tags:'+ url };
+            if (url.indexOf('/') > 1) {
+                url = url.replace('/', '-')
+            }
+            let ghostParams = { limit: 10, filter: 'tags:'+ url };
             posts(ghostParams).then(function(obj) {
                 res.locals.ghostdata.posts = obj;
                 next();
@@ -168,8 +210,24 @@ const GhostCache = function() {
         }
     }
 
+    function setPagesHTMLParser(htmlParserFunction, tagName) { // @TODO: get DRY with setPostsHTMLParser
+        if (!tagName)
+            tagName = 'all';
+        if (typeof htmlParserFunction === 'function') {
+            const testParser = htmlParserFunction('<p>Lorem Ipsum</p>');
+            if (typeof testParser !== 'string') {
+                debug(`setPagesHTMLParser needs a function that returns a string`);
+            } else {
+                opt.postsParser.set(tagName, htmlParserFunction);
+                debug(`HTMLParser for pages with function "${htmlParserFunction.name}" set for tag=${tagName}`);
+            }
+        } else {
+            debug(`setPagesHTMLParser needs a function as parameter`);
+        }
+    }
+
     function pagesMiddleware(req, res, next) {
-        if (!res.locals.ghostdata) res.locals.ghostdata = getEmptryGhostObject();
+        if (!res.locals.ghostdata) res.locals.ghostdata = getEmptyGhostObject();
         if (initialized) {
             // set filter for requested path
             let url = req.originalUrl;
@@ -177,6 +235,9 @@ const GhostCache = function() {
                 url = 'homepage'
             } else {
                 url = url.substring(1);
+            }
+            if (url.indexOf('/') > 1) {
+                url = url.replace('/', '-')
             }
             let ghostParams = { limit: 5, filter: 'tags:'+ url };
             pages(ghostParams).then(function(obj) {
@@ -202,6 +263,8 @@ const GhostCache = function() {
         pages: pages,
         pagesMiddleware: pagesMiddleware,
         postsMiddleware: postsMiddleware,
+        setPostHTMLParser: setPostHTMLParser,
+        setPagesHTMLParser: setPagesHTMLParser,
         purge: purgeCache
     }
 
