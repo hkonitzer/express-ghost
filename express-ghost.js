@@ -91,13 +91,15 @@ const GhostCache = function() {
         if (force || pagesCache.get(tagName) === null) {
             return new Promise(function(resolve ,reject) {
                 getPages(options.filter).then(function(pages) {
+                    let parser = null;
                     debug(`Serving ghost page data from api, fetched ${pages.length} pages`);
                     if (opt.pagesParser.has(tagName)) { // first the parser bound to a specific tag name
-                        const parser = opt.pagesParser.get(tagName);
-                        debug(`Executing parser "${parser.name}" for tagName=${tagName}`);
+                        parser = opt.pagesParser.get(tagName);
                     } else if (opt.pagesParser.has('all')) {
-                        const parser = opt.pagesParser.get('all');
-                        debug(`Executing parser "${parser.name}" for tagName=all`);
+                        parser = opt.pagesParser.get('all');
+                    }
+                    if (parser !== null) {
+                        debug(`Executing parser "${parser.name}" for tagName=${tagName}`);
                         pages.forEach(page => {
                             page.html = parser(page.html);
                         });
@@ -135,16 +137,17 @@ const GhostCache = function() {
         if (force || postsCache.get(tagName) === null) {
             return new Promise(function(resolve ,reject) {
                 getPosts(options.filter).then(function(posts) {
+                    let parser = null;
                     debug(`Serving ghost post data from api, fetched ${posts.length} posts`);
                     if (opt.postsParser.has(tagName)) { // first the parser bound to a specific tag name
-                        const parser = opt.postsParser.get(tagName);
-                        debug(`Executing parser "${parser.name}" for tagName=${tagName}`);
+                        parser = opt.postsParser.get(tagName);
                     } else if (opt.postsParser.has('all')) {
-                        const parser = opt.postsParser.get('all');
-                        debug(`Executing parser "${parser.name}" for tagName=all`);
-                        //posts.forEach(post => parser(post.html));
+                        parser = opt.postsParser.get('all');
+                    }
+                    if (parser !== null) {
+                        debug(`Executing parser "${parser.name}" for tagName=${tagName}`);
                         posts.forEach(post => {
-                          post.html = parser(post.html);
+                            post.html = parser(post.html);
                         });
                     }
                     postsCache.set(tagName, posts);
