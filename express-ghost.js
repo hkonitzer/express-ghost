@@ -101,7 +101,7 @@ const GhostCache = function() {
                     if (parser !== null) {
                         debug(`Executing parser "${parser.name}" for tagName=${tagName}`);
                         pages.forEach(page => {
-                            page.html = parser(page.html);
+                            page.html = parser(page.html, page.slug, 'page');
                         });
                     }
                     pagesCache.set(tagName, pages);
@@ -147,7 +147,7 @@ const GhostCache = function() {
                     if (parser !== null) {
                         debug(`Executing parser "${parser.name}" for tagName=${tagName}`);
                         posts.forEach(post => {
-                            post.html = parser(post.html);
+                            post.html = parser(post.html, post.slug, 'post');
                         });
                     }
                     postsCache.set(tagName, posts);
@@ -175,7 +175,7 @@ const GhostCache = function() {
         if (!tagName)
             tagName = 'all';
         if (typeof htmlParserFunction === 'function') {
-            const testParser = htmlParserFunction('<p>Lorem Ipsum</p>');
+            const testParser = htmlParserFunction('<p>Lorem Ipsum</p>', '', 'test');
             if (typeof testParser !== 'string') {
                 debug(`setPostHTMLParser needs a function that returns a string`);
             } else {
