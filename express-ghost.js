@@ -221,7 +221,7 @@ const GhostCache = function() {
             if (typeof testParser !== 'string') {
                 debug(`setPagesHTMLParser needs a function that returns a string`);
             } else {
-                opt.postsParser.set(tagName, htmlParserFunction);
+                opt.pagesParser.set(tagName, htmlParserFunction);
                 debug(`HTMLParser for pages with function "${htmlParserFunction.name}" set for tag=${tagName}`);
             }
         } else {
