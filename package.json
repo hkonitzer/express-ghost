@@ -15,10 +15,10 @@
     "url": "git://github.com/hkonitzer/express-ghost.git"
   },
   "dependencies": {
-    "@tryghost/content-api": "^1.3.5",
+    "@tryghost/content-api": "^1.4.2",
     "debug": "^4.1.1",
     "nconf": "^0.10.0",
-    "node-html-parser": "^1.1.16"
+    "node-html-parser": "^1.2.20"
   },
   "devDependencies": {},
   "bugs": {
